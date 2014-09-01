@@ -3,6 +3,8 @@ Touch
 
 This is a concatenative programming language for programming on small touch devices such as smart phones.
 
+The program is layed out with instructions from top to bottom, and the stack is visualized with type-colored arrows form producers to consumers, visualizing the stack.
+
 
 Concatenative programming
 -------------------------
