@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2F94F26C-05DD-4DFB-A9EC-BE4E9CFE943E}"
+EndProject
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "Compiler", "Compiler\Compiler.fsproj", "{1D4D4926-49E2-461C-9028-166C8517D626}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1D4D4926-49E2-461C-9028-166C8517D626}.Debug|x86.ActiveCfg = Debug|x86
+		{1D4D4926-49E2-461C-9028-166C8517D626}.Debug|x86.Build.0 = Debug|x86
+		{1D4D4926-49E2-461C-9028-166C8517D626}.Release|x86.ActiveCfg = Release|x86
+		{1D4D4926-49E2-461C-9028-166C8517D626}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1D4D4926-49E2-461C-9028-166C8517D626} = {2F94F26C-05DD-4DFB-A9EC-BE4E9CFE943E}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Compiler\Compiler.fsproj
+	EndGlobalSection
+EndGlobal
