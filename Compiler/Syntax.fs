@@ -13,11 +13,11 @@ type Term
     | TextLiteral of double
     | Instruction of Symbol
 
-type StackType = { rowVariable : string; topElements : List<Type> }
+type StackType = { topElements : List<Type>; rowVariable : int } // In reverse order of the notation, so that :: is "push"
 
-type Type
+and Type
     = Function of StackType * StackType
-    | Variable of string
+    | Variable of int
     | Bool
     | Number
     | Text

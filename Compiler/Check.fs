@@ -1,49 +1,78 @@
 ﻿module Compiler.Check
 open System
+open Operators
 open Compiler.Syntax
 
-type Checker<'A> = {
-    environment : List<String * Type>;
+type CheckerState = {
+    instructions : List<Symbol * StackType * StackType>;
+    environment : List<string * Type>;
     constraints : List<Type * Type>;
     stackConstraints : List<StackType * StackType>;
-    result : 'A
+    nextFresh : int
 }
 
-type CheckerBuilder() =
-    member c.Bind(m, f) = 
-        let m' = f m.result
-        {
-            environment = List.append m'.environment m.environment;
-            constraints = List.append m'.constraints m.constraints;
-            stackConstraints = List.append m'.stackConstraints m.stackConstraints;
-            result = m'.result
-        }
-    member c.Return(x) =
-        { 
-            environment = [];
-            constraints = [];
-            stackConstraints = [];
-            result = x
-        }
-    member c.ReturnFrom(m) = m
+type Checker(initial : CheckerState) = 
+    let mutable state = initial
+    member this.State = state
+    member this.Fresh() =
+        let fresh = state.nextFresh
+        state <- { state with nextFresh = state.nextFresh + 1 }
+        fresh
+    member this.Constraint(t1 : Type, t2 : Type) =
+        state <- { state with constraints = (t1, t2) :: state.constraints }
+    member this.StackConstraint(s1 : StackType, s2 : StackType) =
+        state <- { state with stackConstraints = (s1, s2) :: state.stackConstraints }
+    member this.Bind(x : string, t : Type) =
+        state <- { state with environment = (x, t) :: state.environment }
+    member this.Lookup(x : string) : Option<Type> =
+        Option.map (fun (_, t) -> t) (List.tryFind (fun (x', _) -> x' = x) state.environment)
+    member this.Local<'A>(f : unit -> 'A) =
+        let environment = state.environment
+        let result = f ()
+        state <- { state with environment = environment }
+        result
+    member this.Instruction(symbol : Symbol) : Option<StackType * StackType> =
+        Option.map (fun (_, s1, s2) -> (s1, s2)) (List.tryFind (fun (symbol', _, _) -> symbol' = symbol) state.instructions)
 
-let checker = new CheckerBuilder()
+
+let stackVariable s = { topElements = []; rowVariable = s }
+let stackPush s t = { s with topElements = t :: s.topElements }
 
 
-// Maybe the type should be actually Term * StackType -> StackType
-let rec checkTerm (term : Term) : Checker<Type> = 
+// TODO: Generalize local quotatations? Is that even possible (eg. not rank-n)?
+let rec checkTerm (checker : Checker) (stack : StackType) (term : Term) : StackType = 
     match term with
-    | Quote terms -> checker { return! checkTerms terms }
-    | Unquote -> checker { return Bool }
-    | Pop variable -> checker { return Variable "todo: fresh" }
-    | Push variable -> checker { return Variable "todo: lookup" }
-    | BoolLiteral value -> checker { return Bool }
-    | NumberLiteral value -> checker { return Number }
-    | TextLiteral value -> checker { return Text }
-    | Instruction symbol -> checker { return Text }
+    | Quote terms ->
+        let s = stackVariable (checker.Fresh())
+        let t = checker.Local(fun () -> Function (s, checkTerms checker s terms))
+        stackPush stack t
+    | Unquote -> 
+        let s1 = stackVariable (checker.Fresh())
+        let s2 = stackVariable (checker.Fresh())
+        let s = stackPush s1 (Function (s1, s2))
+        checker.StackConstraint(stack, s)
+        s2
+    | Pop x -> 
+        let t = Variable (checker.Fresh())
+        checker.Bind(x, t)
+        let s = stackPush (stackVariable (checker.Fresh())) t
+        checker.StackConstraint(stack, s)
+        s
+    | Push x -> 
+        let t = Option.get (checker.Lookup(x)) // TODO: Better error message
+        stackPush stack t
+    | BoolLiteral value -> stackPush stack Bool
+    | NumberLiteral value -> stackPush stack Number
+    | TextLiteral value -> stackPush stack Text
+    | Instruction symbol -> 
+        let (s1, s2) = Option.get (checker.Instruction(symbol)) // TODO: Better error message
+        let (s1', s2') = (s1, s2) // TODO: Instantiate function type, just freshen all type variables
+        checker.StackConstraint(stack, s1')
+        s2'
 
-
-and checkTerms (terms : List<Term>) : Checker<Type> = 
+and checkTerms (checker : Checker) (stack : StackType) (terms : List<Term>) : StackType = 
     match terms with
-    | [] -> checker { return Text }
-    | (e::es) -> checkTerms es
+    | [] -> stack
+    | (e::es) -> 
+        let s = checkTerm checker stack e
+        checkTerms checker s es
