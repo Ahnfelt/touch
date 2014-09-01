@@ -18,3 +18,5 @@ In other words, it takes a stack with two Numbers on top and returns a stack wit
 
 A function can naturally consume *and produce* multiple values. 
 For example, the `swap` function swaps the two top values of the stack and thus has type: `S* a b -> S* b a`.
+
+Since most functions only manipulate the topmost values of the stack, we can use the notation `a b -> b a` instead, which expands to the former type.
