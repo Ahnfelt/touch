@@ -42,4 +42,4 @@ let rec prettyType t =
     | Text -> "Text"
 
 and prettyStack s =
-    "s" + s.rowVariable.ToString() + String.concat "" (List.map (fun t -> " " + prettyType t) s.topElements)
+    "s" + s.rowVariable.ToString() + String.concat "" (List.map (fun t -> " " + prettyType t) (List.rev s.topElements))

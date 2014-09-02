@@ -53,6 +53,7 @@
     <Compile Include="Substitution.fs" />
     <Compile Include="Check.fs" />
     <Compile Include="Unification.fs" />
+    <Compile Include="Tarjan.fs" />
     <Compile Include="Program.fs">
       <DependentUpon>TypeVariables.fs</DependentUpon>
     </Compile>
