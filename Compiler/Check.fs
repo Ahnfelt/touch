@@ -2,6 +2,7 @@
 open System
 open Operators
 open Compiler.Syntax
+open Compiler
 
 type CheckerState = {
     instructions : List<Symbol * StackType * StackType>;
@@ -66,7 +67,13 @@ let rec checkTerm (checker : Checker) (stack : StackType) (term : Term) : StackT
     | TextLiteral value -> stackPush stack Text
     | Instruction symbol -> 
         let (s1, s2) = Option.get (checker.Instruction(symbol)) // TODO: Better error message
-        let (s1', s2') = (s1, s2) // TODO: Instantiate function type, just freshen all type variables
+        // Instantiate the implicit "forall", by freshening all the stack & type variables
+        let free = Free.union (Free.inStack s1) (Free.inStack s2)
+        let substitution = {
+            Substitution.stacks = Map.ofList (List.map (fun x -> (x, stackVariable (checker.Fresh()))) free.stackVariables);
+            Substitution.types = Map.ofList (List.map (fun x -> (x, Variable (checker.Fresh()))) free.typeVariables)
+        }
+        let (s1', s2') = (Substitution.inStack substitution s1, Substitution.inStack substitution s2)
         checker.StackConstraint(stack, s1')
         s2'
 

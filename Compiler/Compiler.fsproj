@@ -7,6 +7,18 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Compiler</RootNamespace>
     <AssemblyName>Compiler</AssemblyName>
+    <ProductVersion>12.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <BuildOrder>
+      <BuildOrder>
+        <String>AssemblyInfo.fs</String>
+        <String>Syntax.fs</String>
+        <String>Free.fs</String>
+        <String>Substitution.fs</String>
+        <String>Check.fs</String>
+        <String>Program.fs</String>
+      </BuildOrder>
+    </BuildOrder>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,7 +52,11 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Syntax.fs" />
     <Compile Include="Check.fs" />
-    <Compile Include="Program.fs" />
+    <Compile Include="Program.fs">
+      <DependentUpon>TypeVariables.fs</DependentUpon>
+    </Compile>
+    <Compile Include="Free.fs" />
+    <Compile Include="Substitution.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.1\Framework\v4.0\Microsoft.FSharp.Targets" />
 </Project>
