@@ -5,6 +5,17 @@ open Compiler.Syntax
 
 type Substitution = { stacks : Map<int, StackType>; types : Map<int, Type> }
 
+let empty = { stacks = Map.empty; types = Map.empty }
+
+// NOTE: This is slow if substitution1 is big, and substitution1 wins
+let union substitution1 substitution2 = { 
+    stacks = Map.fold (fun map x s -> Map.add x s map) substitution2.stacks substitution1.stacks;
+    types = Map.fold (fun map x t -> Map.add x t map) substitution2.types substitution1.types
+}
+
+let addStack x s substitution = { substitution with stacks = Map.add x s substitution.stacks }
+let addType x t substitution = { substitution with types = Map.add x t substitution.types }
+
 let rec inStack (substitution : Substitution) (stack : StackType) : StackType =
     let ts = List.map (inType substitution) stack.topElements
     match Map.tryFind stack.rowVariable substitution.stacks with
