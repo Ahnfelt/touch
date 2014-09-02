@@ -1,6 +1,8 @@
+// This file contains logic for finding free type & stack variables.
 module Compiler.Free
 open System
 open Compiler.Syntax
+
 
 type Free = { stackVariables : List<int>; typeVariables : List<int> }
 let private freeEmpty = { stackVariables = []; typeVariables = [] }

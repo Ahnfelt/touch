@@ -1,3 +1,4 @@
+// This file contains logic for applying substitutions for type & stack variables.
 module Compiler.Substitution
 open System
 open Compiler.Syntax

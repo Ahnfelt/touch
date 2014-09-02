@@ -1,5 +1,7 @@
-﻿module Compiler.Syntax
+﻿// This file contains the AST for terms & types.
+module Compiler.Syntax
 open System
+
 
 type Symbol = { user : string; package : string; name : string }
 

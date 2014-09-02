@@ -1,4 +1,5 @@
-﻿module Compiler.Unification
+﻿// This file contains an implementation of a type unification algorithm, which can also unify stack types.
+module Compiler.Unification
 open Compiler.Syntax
 open Compiler
 

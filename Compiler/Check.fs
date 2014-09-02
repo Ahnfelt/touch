@@ -1,4 +1,5 @@
-﻿module Compiler.Check
+﻿// This file contains logic for generating type & stack constraints from expressions.
+module Compiler.Check
 open System
 open Operators
 open Compiler.Syntax
