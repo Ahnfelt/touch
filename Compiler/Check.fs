@@ -13,6 +13,14 @@ type CheckerState = {
     nextFresh : int
 }
 
+let emptyCheckerState = {
+    instructions = [];
+    environment = [];
+    constraints = [];
+    stackConstraints = [];
+    nextFresh = 0
+}
+
 type Checker(initial : CheckerState) = 
     let mutable state = initial
     member this.State = state
@@ -57,8 +65,8 @@ let rec checkTerm (checker : Checker) (stack : StackType) (term : Term) : StackT
     | Pop x -> 
         let t = Variable (checker.Fresh())
         checker.Bind(x, t)
-        let s = stackPush (stackVariable (checker.Fresh())) t
-        checker.StackConstraint(stack, s)
+        let s = stackVariable (checker.Fresh())
+        checker.StackConstraint(stack, stackPush s t)
         s
     | Push x -> 
         let t = Option.get (checker.Lookup(x)) // TODO: Better error message

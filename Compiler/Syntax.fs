@@ -31,3 +31,15 @@ and Type
 // The following type cases
 //    | SumType of Symbol
 //    | ProductType of Symbol
+
+
+let rec prettyType t =
+    match t with
+    | Function (s1, s2) -> "(" + prettyStack s1 + " -> " + prettyStack s2 + ")"
+    | Variable x -> "t" + x.ToString()
+    | Bool -> "Bool"
+    | Number -> "Number"
+    | Text -> "Text"
+
+and prettyStack s =
+    "s" + s.rowVariable.ToString() + String.concat "" (List.map (fun t -> " " + prettyType t) s.topElements)
