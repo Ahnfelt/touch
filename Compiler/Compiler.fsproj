@@ -14,9 +14,14 @@
         <String>Free.fs</String>
         <String>Substitution.fs</String>
         <String>Check.fs</String>
+        <String>Unification.fs</String>
+        <String>Tarjan.fs</String>
+        <String>Typing.fs</String>
         <String>Program.fs</String>
       </BuildOrder>
     </BuildOrder>
+    <ProductVersion>12.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -57,6 +62,7 @@
     <Compile Include="Program.fs">
       <DependentUpon>TypeVariables.fs</DependentUpon>
     </Compile>
+    <Compile Include="Typing.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.1\Framework\v4.0\Microsoft.FSharp.Targets" />
 </Project>

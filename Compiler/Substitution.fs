@@ -33,3 +33,9 @@ and inType (substitution : Substitution) (t : Type) : Type =
     | Bool -> Bool
     | Number -> Number
     | Text -> Text
+
+
+let pretty substitution =
+    let stacks = List.map (fun (x, s) -> "s" + x.ToString() + " = " + prettyStack s) (Map.toList substitution.stacks)
+    let types = List.map (fun (x, t) -> "t" + x.ToString() + " = " + prettyType t) (Map.toList substitution.types)
+    "[" + (String.concat ", " (List.append stacks types)) + "]"

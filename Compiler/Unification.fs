@@ -7,6 +7,8 @@ exception TypeError of string
 
 let rec unify (constraints : List<Type * Type>) (stackConstraints : List<StackType * StackType>) : Substitution.Substitution =
     match stackConstraints with
+    | ({ topElements = []; rowVariable = x1 }, { topElements = []; rowVariable = x2 })::cs when x1 = x2 -> 
+        unify constraints cs
     | ({ topElements = []; rowVariable = x }, s)::cs | (s, { topElements = []; rowVariable = x })::cs ->
         let free = Free.inStack s
         if List.exists (fun x' -> x' = x) free.stackVariables then raise (TypeError ("s" + x.ToString() + " occurs in " + s.ToString()))

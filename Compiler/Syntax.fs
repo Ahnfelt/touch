@@ -35,7 +35,7 @@ and Type
 
 let rec prettyType t =
     match t with
-    | Function (s1, s2) -> "(" + prettyStack s1 + " -> " + prettyStack s2 + ")"
+    | Function (s1, s2) -> "{" + prettyStack s1 + " -> " + prettyStack s2 + "}"
     | Variable x -> "t" + x.ToString()
     | Bool -> "Bool"
     | Number -> "Number"
@@ -43,3 +43,6 @@ let rec prettyType t =
 
 and prettyStack s =
     "s" + s.rowVariable.ToString() + String.concat "" (List.map (fun t -> " " + prettyType t) (List.rev s.topElements))
+
+
+let prettySymbol x = x.user + "." + x.package + "." + x.name
