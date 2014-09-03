@@ -30,29 +30,53 @@ let testTarjan () =
     let components = stronglyConnectedComponents vertices edges
     printfn "%A" components
 
-let testFib () =
-    let core x = { user = "touch"; package = "core"; name = x }
-    let name x = { user = "touch"; package = "test"; name = x }
+let core x = { user = "touch"; package = "core"; name = x }
+let name x = { user = "touch"; package = "test"; name = x }
+let call x = Instruction (core x)
+let fibProgram = [
+        (name "fib", [
+            Pop "n"; 
+            Push "n"; NumberLiteral 2.0; call ">=";
+            Quote [
+                Push "n"; NumberLiteral 1.0; call "-"; Instruction (name "fib");
+                Push "n"; NumberLiteral 2.0; call "-"; Instruction (name "fib");
+                call "+"
+            ];
+            Quote [NumberLiteral 1.0];
+            call "if"
+        ])
+    ]
+let rank2Program = [ // Will fail to type check since the required type is rank2, which we don't currently support, eg. f : {forall s1. s1 {forall s2. s2 Text -> s2} -> s1}
+        (name "f", [
+            Pop "g"; 
+            NumberLiteral 2.0; TextLiteral "foo"; Push "g"; Unquote; Pop "a";
+            BoolLiteral false; TextLiteral "bar"; Push "g"; Unquote; Pop "b";
+            Push "a"; Push "b";
+        ])
+    ]
+let mutualRecursionProgram = [
+        (name "f", [
+            call "duplicate"; 
+            NumberLiteral 0.0; call ">=";
+            Quote [NumberLiteral 1.0; call "-"; Instruction (name "f")];
+            Quote [BoolLiteral true; Instruction (name "g")];
+            call "if";
+        ]);
+        (name "g", [
+            Quote [NumberLiteral 2.0; call "+"; BoolLiteral false; Instruction (name "g")];
+            Quote [];
+            call "if";
+        ])
+    ]
+
+let testProgram instructions =
     let predefinedInstructionTypes = [
             (core ">=", stackPush (stackPush (stackVariable 1) Number) Number, stackPush (stackVariable 1) Bool);
             (core "+", stackPush (stackPush (stackVariable 1) Number) Number, stackPush (stackVariable 1) Number); 
             (core "-", stackPush (stackPush (stackVariable 1) Number) Number, stackPush (stackVariable 1) Number);
+            (core "duplicate", stackPush (stackVariable 1) (Variable 2), stackPush (stackPush (stackVariable 1) (Variable 2)) (Variable 2));
             (core "if", stackPush (stackPush (stackPush (stackVariable 1) Bool) (Function (stackVariable 1, stackVariable 2))) (Function (stackVariable 1, stackVariable 2)), stackVariable 2);
             (name "fib'", stackPush (stackVariable 1) Number, stackPush (stackVariable 1) Number); 
-        ]
-    let i x = Instruction (core x)
-    let instructions = [
-            (name "fib", [
-                Pop "n"; 
-                Push "n"; NumberLiteral 2.0; i ">=";
-                Quote [
-                    Push "n"; NumberLiteral 1.0; i "-"; Instruction (name "fib");
-                    Push "n"; NumberLiteral 2.0; i "-"; Instruction (name "fib");
-                    i "+"
-                ];
-                Quote [NumberLiteral 1.0];
-                i "if"
-            ])
         ]
     let instructionTypes = Typing.checkInstructions predefinedInstructionTypes instructions
     for (x, s1, s2) in instructionTypes do 
@@ -63,7 +87,7 @@ let testFib () =
 let main argv = 
     //testTarjan ()
     //testCheck es3
-    testFib ()
+    testProgram mutualRecursionProgram
     //printfn "Press return to continue..."
     //System.Console.Read() |> ignore
     0

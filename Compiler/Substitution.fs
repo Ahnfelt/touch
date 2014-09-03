@@ -2,11 +2,17 @@
 module Compiler.Substitution
 open System
 open Compiler.Syntax
+open Compiler.Free
 
 
 type Substitution = { stacks : Map<int, StackType>; types : Map<int, Type> }
 
 let empty = { stacks = Map.empty; types = Map.empty }
+
+let renaming free = { 
+    stacks = Map.ofList <| List.mapi (fun i x -> (x, { topElements = []; rowVariable = (i + 1) })) free.stackVariables; 
+    types = Map.ofList <| List.mapi (fun i x -> (x, Variable (i + 1))) free.typeVariables;
+}
 
 // NOTE: This is slow if substitution1 is big, and substitution1 wins
 let union substitution1 substitution2 = { 

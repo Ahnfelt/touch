@@ -12,7 +12,7 @@ type Term
     | Push of string
     | BoolLiteral of bool
     | NumberLiteral of double
-    | TextLiteral of double
+    | TextLiteral of string
     | Instruction of Symbol
 
 type StackType = { topElements : List<Type>; rowVariable : int } // In reverse order of the notation, so that :: is "push"
