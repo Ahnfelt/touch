@@ -49,7 +49,16 @@ let stackVariable s = { topElements = []; rowVariable = s }
 let stackPush s t = { s with topElements = t :: s.topElements }
 
 
-// TODO: Generalize local quotatations? Is that even possible (eg. not rank-n)?
+// Instantiate all the free type variables in the type, as if there were implicit "foralls" for these at the top level of the type.
+let instantiateFree (checker : Checker) (t : Type) : Type =
+    let free = Free.inType t
+    let substitution = {
+        Substitution.stacks = Map.ofList (List.map (fun x -> (x, stackVariable (checker.Fresh()))) free.stackVariables);
+        Substitution.types = Map.ofList (List.map (fun x -> (x, Variable (checker.Fresh()))) free.typeVariables)
+    }
+    Substitution.inType substitution t
+
+
 let rec checkTerm (checker : Checker) (stack : StackType) (term : Term) : StackType = 
     match term with
     | Quote terms ->
@@ -69,22 +78,23 @@ let rec checkTerm (checker : Checker) (stack : StackType) (term : Term) : StackT
         checker.StackConstraint(stack, stackPush s t)
         s
     | Push x -> 
-        let t = Option.get (checker.Lookup(x)) // TODO: Better error message
-        stackPush stack t
+        match checker.Lookup(x) with
+        | None -> raise (TypeError ("Uknown variable: " + x))
+        | Some t -> stackPush stack t
     | BoolLiteral value -> stackPush stack Bool
     | NumberLiteral value -> stackPush stack Number
     | TextLiteral value -> stackPush stack Text
-    | Instruction symbol -> 
-        let (s1, s2) = Option.get (checker.Instruction(symbol)) // TODO: Better error message
-        // Instantiate the implicit "forall", by freshening all the stack & type variables
-        let free = Free.inType (Function (s1, s2))
-        let substitution = {
-            Substitution.stacks = Map.ofList (List.map (fun x -> (x, stackVariable (checker.Fresh()))) free.stackVariables);
-            Substitution.types = Map.ofList (List.map (fun x -> (x, Variable (checker.Fresh()))) free.typeVariables)
-        }
-        let (s1', s2') = (Substitution.inStack substitution s1, Substitution.inStack substitution s2)
-        checker.StackConstraint(stack, s1')
-        s2'
+    | JavaScript (t, _) -> // Note that there's an implicit forall around t for all free type variables
+        stackPush stack (instantiateFree checker t)
+    | Instruction symbol ->
+        match checker.Instruction(symbol) with
+        | None -> raise (TypeError ("Uknown instruction: " + prettySymbol symbol))
+        | Some (s1, s2) ->
+            match instantiateFree checker (Function (s1, s2)) with
+            | Function (s1', s2') ->
+                checker.StackConstraint(stack, s1')
+                s2'
+            | _ -> raise (TypeError "Internal error: Unexpected result of instantiation")
 
 and checkTerms (checker : Checker) (stack : StackType) (terms : List<Term>) : StackType = 
     match terms with

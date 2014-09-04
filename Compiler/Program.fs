@@ -7,11 +7,11 @@ open Compiler.Check
 
 // In the following examples, s and s0-s99 are stack variables, while t and t0-t99 are type variables.
 
-let es0 = [] // (s -> s)
-let es1 = [Pop "x"; Push "x"; Push "x"] // (s t -> s t t)
-let es2 = [NumberLiteral 3.0; Pop "x"; Push "x"; Push "x"] // (s -> s Number Number)
-let es3 = [Pop "x"; Quote [Push "x"; NumberLiteral 3.0]] // (s t -> s (s' -> s' t Number))
-let es4 = [Pop "x"; Quote [Push "x"; NumberLiteral 3.0]; Unquote] // (s t -> s t Number)
+let es0 = [] // {s -> s}
+let es1 = [Pop "x"; Push "x"; Push "x"] // {s t -> s t t}
+let es2 = [NumberLiteral 3.0; Pop "x"; Push "x"; Push "x"] // {s -> s Number Number}
+let es3 = [Pop "x"; Quote [Push "x"; NumberLiteral 3.0]] // {s t -> s {s' -> s' t Number}}
+let es4 = [Pop "x"; Quote [Push "x"; NumberLiteral 3.0]; Unquote] // {s t -> s t Number}
 
 let testCheck es =
     let t = Function <| Typing.checkFunction [] es

@@ -3,8 +3,6 @@ module Compiler.Unification
 open Compiler.Syntax
 open Compiler
 
-exception TypeError of string
-
 let rec unify (constraints : List<Type * Type>) (stackConstraints : List<StackType * StackType>) : Substitution.Substitution =
     match stackConstraints with
     | ({ topElements = []; rowVariable = x1 }, { topElements = []; rowVariable = x2 })::cs when x1 = x2 -> 

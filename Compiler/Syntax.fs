@@ -13,9 +13,10 @@ type Term
     | BoolLiteral of bool
     | NumberLiteral of double
     | TextLiteral of string
+    | JavaScript of Type * string
     | Instruction of Symbol
 
-type StackType = { topElements : List<Type>; rowVariable : int } // In reverse order of the notation, so that :: is "push"
+and StackType = { topElements : List<Type>; rowVariable : int } // In reverse order of the notation, so that :: is "push"
 
 and Type
     = Function of StackType * StackType
@@ -25,6 +26,7 @@ and Type
     | Text
 
 
+exception TypeError of string
 
 
 // TODO: Product & sum type (de)construction

@@ -41,7 +41,7 @@ let rec checkComponents instructionTypes components =
             let (s1', s2') = checkFunction instructionTypes''' es 
             let (t, t') = (Function (s1, s2), Function (s1', s2'))
             // The syntactic equivalence is enough here only because of the canonical renaming done in checkFunction.
-            if t <> t' then raise (Unification.TypeError ("Recursive function type " + prettyType t + " != " + prettyType t'))
+            if t <> t' then raise (TypeError ("Recursive function type " + prettyType t + " != " + prettyType t'))
         checkComponents instructionTypes''' components'
     
 
