@@ -85,7 +85,11 @@ let rec checkTerm (checker : Checker) (stack : StackType) (term : Term) : StackT
     | NumberLiteral value -> stackPush stack Number
     | TextLiteral value -> stackPush stack Text
     | JavaScript (t, _) -> // Note that there's an implicit forall around t for all free type variables
-        stackPush stack (instantiateFree checker t)
+        match instantiateFree checker t with
+        | Function (s1', s2') ->
+            checker.StackConstraint(stack, s1')
+            s2'
+        | _ -> raise (TypeError "Internal error: Unexpected non-function type of JavaScript")
     | Instruction symbol ->
         match checker.Instruction(symbol) with
         | None -> raise (TypeError ("Uknown instruction: " + prettySymbol symbol))
@@ -94,7 +98,7 @@ let rec checkTerm (checker : Checker) (stack : StackType) (term : Term) : StackT
             | Function (s1', s2') ->
                 checker.StackConstraint(stack, s1')
                 s2'
-            | _ -> raise (TypeError "Internal error: Unexpected result of instantiation")
+            | _ -> raise (TypeError "Internal error: Unexpected non-function type of instruction")
 
 and checkTerms (checker : Checker) (stack : StackType) (terms : List<Term>) : StackType = 
     match terms with

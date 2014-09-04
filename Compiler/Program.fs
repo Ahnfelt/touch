@@ -75,7 +75,6 @@ let alertProgram = [
                 [Text] --> [],
                 "window.alert('Hello, ' + $.pop() + '!')"
             );
-            Unquote;
         ])
     ]
 
@@ -90,13 +89,28 @@ let testProgram instructions =
     let instructionTypes = Typing.checkInstructions predefinedInstructionTypes instructions
     for (x, t) in instructionTypes do 
         printfn "%s : %s" (Syntax.prettySymbol x) (Syntax.prettyType t)
-    
+
+
+let compile predefinedInstructionTypes instructions mainSymbol =
+    let instructionTypes = Typing.checkInstructions predefinedInstructionTypes instructions
+    let typedInstructions = List.map (fun (x, t) -> (x, t, snd <| List.find (fun (x', _) -> x' = x) instructions)) instructionTypes
+    match mainSymbol with
+    | None -> Emit.emitInstructions typedInstructions
+    | Some x -> 
+        let t = snd <| List.find (fun (x', _) -> x' = x) instructionTypes
+        if t <> ([] --> []) then raise (TypeError ("Expected the main function " + prettySymbol x + " to have type {s1 -> s1}, but it had type " + prettyType t))
+        Emit.emitProgram x typedInstructions
+
 
 [<EntryPoint>]
 let main argv = 
-    //testTarjan ()
-    //testCheck es3
-    testProgram alertProgram
-    //printfn "Press return to continue..."
+    try 
+        //testTarjan ()
+        //testCheck es3
+        //testProgram alertProgram
+        printfn "%s" <| compile [] alertProgram (Some (name "main"))
+        //printfn "Press return to continue..."
+    with TypeError e ->
+        printfn "%s" e
     System.Console.Read() |> ignore
     0
