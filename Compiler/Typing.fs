@@ -32,10 +32,16 @@ let rec checkComponents instructionTypes components =
         // This is a probably horribly broken hack to work around polymorphic recursion: 
         // - Infer types for the instructions where recursive occurances are assumed to be (forall s1 s2. s1 -> s2)
         // - Then check the instructions again with the infered types
+        // - Finally check that the newly inferred type is the same as the type initially inferred
         let instructionTypes' = List.append (List.map (fun (x, _) -> (x, Check.stackVariable 1, Check.stackVariable 2)) instructions) instructionTypes
         let instructionTypes'' = List.map (fun (x, es) -> (x, checkFunction instructionTypes' es)) instructions
         let instructionTypes''' = List.append (List.map (fun (x, (s1, s2)) -> (x, s1, s2)) instructionTypes'') instructionTypes
-        for (x, es) in instructions do ignore <| checkFunction instructionTypes''' es
+        for (x, es) in instructions do 
+            let (_, s1, s2) = List.find (fun (x', _, _) -> x' = x) instructionTypes'''
+            let (s1', s2') = checkFunction instructionTypes''' es 
+            let (t, t') = (Function (s1, s2), Function (s1', s2'))
+            // The syntactic equivalence is enough here only because of the canonical renaming done in checkFunction.
+            if t <> t' then raise (Unification.TypeError ("Recursive function type " + prettyType t + " != " + prettyType t'))
         checkComponents instructionTypes''' components'
     
 
