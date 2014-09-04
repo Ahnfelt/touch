@@ -59,10 +59,8 @@
     <Compile Include="Check.fs" />
     <Compile Include="Unification.fs" />
     <Compile Include="Tarjan.fs" />
-    <Compile Include="Program.fs">
-      <DependentUpon>TypeVariables.fs</DependentUpon>
-    </Compile>
     <Compile Include="Typing.fs" />
+    <Compile Include="Program.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.1\Framework\v4.0\Microsoft.FSharp.Targets" />
 </Project>

@@ -87,7 +87,7 @@ let testProgram instructions =
 let main argv = 
     //testTarjan ()
     //testCheck es3
-    testProgram rank2Program
+    testProgram mutualRecursionProgram
     //printfn "Press return to continue..."
-    //System.Console.Read() |> ignore
+    System.Console.Read() |> ignore
     0
