@@ -6,7 +6,7 @@ open Compiler.Syntax
 open Compiler
 
 type CheckerState = {
-    instructions : List<Symbol * StackType * StackType>;
+    instructions : List<Symbol * Type>;
     environment : List<string * Type>;
     constraints : List<Type * Type>;
     stackConstraints : List<StackType * StackType>;
@@ -41,8 +41,8 @@ type Checker(initial : CheckerState) =
         let result = f ()
         state <- { state with environment = environment }
         result
-    member this.Instruction(symbol : Symbol) : Option<StackType * StackType> =
-        Option.map (fun (_, s1, s2) -> (s1, s2)) (List.tryFind (fun (symbol', _, _) -> symbol' = symbol) state.instructions)
+    member this.Instruction(symbol : Symbol) : Option<Type> =
+        Option.map snd (List.tryFind (fun (symbol', _) -> symbol' = symbol) state.instructions)
 
 
 let stackVariable s = { topElements = []; rowVariable = s }
@@ -89,8 +89,8 @@ let rec checkTerm (checker : Checker) (stack : StackType) (term : Term) : StackT
     | Instruction symbol ->
         match checker.Instruction(symbol) with
         | None -> raise (TypeError ("Uknown instruction: " + prettySymbol symbol))
-        | Some (s1, s2) ->
-            match instantiateFree checker (Function (s1, s2)) with
+        | Some t ->
+            match instantiateFree checker t with
             | Function (s1', s2') ->
                 checker.StackConstraint(stack, s1')
                 s2'

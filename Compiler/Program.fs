@@ -14,7 +14,7 @@ let es3 = [Pop "x"; Quote [Push "x"; NumberLiteral 3.0]] // {s t -> s {s' -> s' 
 let es4 = [Pop "x"; Quote [Push "x"; NumberLiteral 3.0]; Unquote] // {s t -> s t Number}
 
 let testCheck es =
-    let t = Function <| Typing.checkFunction [] es
+    let t = Typing.checkFunction [] es
     printfn "%s" (Syntax.prettyType t)
 
 let testTarjan () =
@@ -68,26 +68,35 @@ let mutualRecursionProgram = [
             call "if";
         ])
     ]
+let alertProgram = [
+        (name "main", [
+            TextLiteral "World";
+            JavaScript (
+                [Text] --> [],
+                "window.alert('Hello, ' + $.pop() + '!')"
+            );
+            Unquote;
+        ])
+    ]
 
 let testProgram instructions =
     let predefinedInstructionTypes = [
-            (core ">=", stackPush (stackPush (stackVariable 1) Number) Number, stackPush (stackVariable 1) Bool);
-            (core "+", stackPush (stackPush (stackVariable 1) Number) Number, stackPush (stackVariable 1) Number); 
-            (core "-", stackPush (stackPush (stackVariable 1) Number) Number, stackPush (stackVariable 1) Number);
-            (core "duplicate", stackPush (stackVariable 1) (Variable 2), stackPush (stackPush (stackVariable 1) (Variable 2)) (Variable 2));
-            (core "if", stackPush (stackPush (stackPush (stackVariable 1) Bool) (Function (stackVariable 1, stackVariable 2))) (Function (stackVariable 1, stackVariable 2)), stackVariable 2);
-            (name "fib'", stackPush (stackVariable 1) Number, stackPush (stackVariable 1) Number); 
+            (core ">=", [Number; Number] --> [Bool]);
+            (core "+", [Number; Number] --> [Number]); 
+            (core "-", [Number; Number] --> [Number]);
+            (core "duplicate", [Variable 2] --> [Variable 2; Variable 2]);
+            (core "if", (1, [Bool; (1, []) ==> (2, []); (1, []) ==> (2, [])]) ==> (2, []));
         ]
     let instructionTypes = Typing.checkInstructions predefinedInstructionTypes instructions
-    for (x, s1, s2) in instructionTypes do 
-        printfn "%s : %s" (Syntax.prettySymbol x) (Syntax.prettyType (Function (s1, s2)))
+    for (x, t) in instructionTypes do 
+        printfn "%s : %s" (Syntax.prettySymbol x) (Syntax.prettyType t)
     
 
 [<EntryPoint>]
 let main argv = 
     //testTarjan ()
     //testCheck es3
-    testProgram mutualRecursionProgram
+    testProgram alertProgram
     //printfn "Press return to continue..."
     System.Console.Read() |> ignore
     0

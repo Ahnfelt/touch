@@ -29,6 +29,11 @@ and Type
 exception TypeError of string
 
 
+// Syntactic sugar for function types
+let (==>) ((s1, ts1) : int * Type list) ((s2, ts2) : int * Type list) = Function ({ topElements = List.rev ts1; rowVariable = s1 }, { topElements = List.rev ts2; rowVariable = s2 })
+let (-->) (ts1 : Type list) (ts2 : Type list) = (1, ts1) ==> (1, ts2)
+
+
 // TODO: Product & sum type (de)construction
 // The following type cases
 //    | SumType of Symbol
