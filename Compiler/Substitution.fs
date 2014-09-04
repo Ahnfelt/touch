@@ -9,12 +9,16 @@ type Substitution = { stacks : Map<int, StackType>; types : Map<int, Type> }
 
 let empty = { stacks = Map.empty; types = Map.empty }
 
+
+// Together with a deterministic algorithm for finding free variables, this subtitution
+// provides a canonical renaming such that if two types are "equal modulo renaming of free type variables",
+// then their renaming is syntactically equal.
 let renaming free = { 
     stacks = Map.ofList <| List.mapi (fun i x -> (x, { topElements = []; rowVariable = (i + 1) })) free.stackVariables; 
     types = Map.ofList <| List.mapi (fun i x -> (x, Variable (i + 1))) free.typeVariables;
 }
 
-// NOTE: This is slow if substitution1 is big, and substitution1 wins
+// NOTE: The left substitution wins. This is slow if the left substitution is big.
 let union substitution1 substitution2 = { 
     stacks = Map.fold (fun map x s -> Map.add x s map) substitution2.stacks substitution1.stacks;
     types = Map.fold (fun map x t -> Map.add x t map) substitution2.types substitution1.types
