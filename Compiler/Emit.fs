@@ -1,9 +1,11 @@
 ﻿module Compiler.Emit
+open System
 open Compiler.Syntax
 
 // TODO: Check this string escaping logic
 let escapeChar c = 
     match c with
+    | '\'' -> "\\\'"
     | '\"' -> "\\\""
     | '\\' -> "\\\\"
     | '\b' -> "\\\b"
@@ -14,30 +16,34 @@ let escapeChar c =
     | _ -> c.ToString()
 let escapeString s = "\"" + String.collect escapeChar s + "\""
 
-// TODO: Check that this will become a valid JavaScript identifier to avoid XSS
-let private jsSymbol symbol = symbol.user + "_" + symbol.package + "_" + symbol.name
+let private jsIdentifier (x : String) = 
+    let escape c = "$" + ((int) c).ToString("X4")
+    let first = if Char.IsLetter(x.[0]) && (int) x.[0] < 128 then x.[0].ToString() else escape x.[0]
+    let rest = String.collect (function c -> if Char.IsLetterOrDigit(c) && (int) c < 128 then c.ToString() else escape c) (x.Substring(1))
+    first + rest
+let private jsSymbol symbol = jsIdentifier symbol.user + "_" + jsIdentifier symbol.package + "_" + jsIdentifier symbol.name
 
 let rec emit (term : Term) : string =
     match term with
     | Quote terms ->
-        "$.push(function($) {\n" + 
+        "stack.push(function(stack) {\n" + 
         String.concat "" (List.map emit terms) +
         "});\n"
     | Unquote -> 
-        "($.pop())($);\n"
+        "(stack.pop())(stack);\n"
     | Pop x -> 
-        "var " + x + "_ = $.pop();\n"
+        "var " + jsIdentifier x + "_ = stack.pop();\n"
     | Push x -> 
-        "$.push(" + x + "_);\n"
-    | BoolLiteral value -> "$.push(" + value.ToString() + ");\n"
-    | NumberLiteral value -> "$.push(" + value.ToString() + ");\n"
-    | TextLiteral value -> "$.push(" + escapeString value + ");\n"
+        "stack.push(" + jsIdentifier x + "_);\n"
+    | BoolLiteral value -> "stack.push(" + value.ToString() + ");\n"
+    | NumberLiteral value -> "stack.push(" + value.ToString() + ");\n"
+    | TextLiteral value -> "stack.push(" + escapeString value + ");\n"
     | JavaScript (_, code) -> code + ";\n"
-    | Instruction symbol -> jsSymbol symbol + "($);\n"
+    | Instruction symbol -> jsSymbol symbol + "(stack);\n"
 
 let emitInstruction (symbol, t, terms) : string =
     "// " + prettyType t + "\n" +
-    "function " + jsSymbol symbol + "($) {\n" +
+    "function " + jsSymbol symbol + "(stack) {\n" +
     String.concat "" (List.map emit terms) +
     "}\n"
 

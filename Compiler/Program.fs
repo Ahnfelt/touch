@@ -73,7 +73,7 @@ let alertProgram = [
             TextLiteral "World";
             JavaScript (
                 [Text] --> [],
-                "window.alert('Hello, ' + $.pop() + '!')"
+                "window.alert('Hello, ' + stack.pop() + '!')"
             );
         ])
     ]
