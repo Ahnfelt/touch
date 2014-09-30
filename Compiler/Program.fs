@@ -118,6 +118,7 @@ let main argv =
         //testCheck es3
         //testProgram alertProgram
         printfn "%s" <| compile [] (List.append predefinedInstructions fibProgram) None //(Some (name "main"))
+        //Parser.testTypeParser "{s1 Bool {s1 -> s2} {s1 -> s2} -> s2}" 
         //printfn "Press return to continue..."
     with TypeError e ->
         printfn "%s" e
