@@ -20,6 +20,7 @@ and StackType = { topElements : List<Type>; rowVariable : int } // In reverse or
 
 and Type
     = Function of StackType * StackType
+    | Constructor of Symbol * List<Type>
     | Variable of int
     | Bool
     | Number
@@ -40,9 +41,14 @@ let (-->) (ts1 : Type list) (ts2 : Type list) = (1, ts1) ==> (1, ts2)
 //    | ProductType of Symbol
 
 
+let prettySymbol x = x.user + "." + x.package + "." + x.name
+
+
 let rec prettyType t =
     match t with
     | Function (s1, s2) -> "{" + prettyStack s1 + " -> " + prettyStack s2 + "}"
+    | Constructor (x, []) -> prettySymbol x
+    | Constructor (x, ts) -> prettySymbol x + "[" + String.concat "," (List.map prettyType ts) + "]"
     | Variable x -> "t" + x.ToString()
     | Bool -> "Bool"
     | Number -> "Number"
@@ -50,6 +56,3 @@ let rec prettyType t =
 
 and prettyStack s =
     "s" + s.rowVariable.ToString() + String.concat "" (List.map (fun t -> " " + prettyType t) (List.rev s.topElements))
-
-
-let prettySymbol x = x.user + "." + x.package + "." + x.name

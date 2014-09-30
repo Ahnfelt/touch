@@ -24,6 +24,7 @@ let rec unify (constraints : List<Type * Type>) (stackConstraints : List<StackTy
             let substitution = Substitution.addType x t Substitution.empty
             Substitution.addType x t (unify' substitution cs stackConstraints)
         | (Function (s1, s1'), Function (s2, s2'))::cs -> unify cs ((s1, s2)::(s1', s2')::stackConstraints)
+        | (Constructor (x1, ts1), Constructor (x2, ts2))::cs when x1 = x2 && List.length ts1 = List.length ts2 -> unify (List.append (List.zip ts1 ts2) cs) stackConstraints
         | (t1, t2)::_ -> raise (TypeError (prettyType t1 + " != " + prettyType t2))
 
 and private unify' (substitution : Substitution.Substitution) (constraints : List<Type * Type>) (stackConstraints : List<StackType * StackType>) : Substitution.Substitution =

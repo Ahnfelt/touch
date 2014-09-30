@@ -17,7 +17,7 @@ let escapeChar c =
 let escapeString s = "\"" + String.collect escapeChar s + "\""
 
 let private jsIdentifier (x : String) = 
-    let escape c = "$" + ((int) c).ToString("X4")
+    let escape c = if (int) c <= 0xFF then  "$" + ((int) c).ToString("X2") else "$$" + ((int) c).ToString("X4")
     let first = if Char.IsLetter(x.[0]) && (int) x.[0] < 128 then x.[0].ToString() else escape x.[0]
     let rest = String.collect (function c -> if Char.IsLetterOrDigit(c) && (int) c < 128 then c.ToString() else escape c) (x.Substring(1))
     first + rest

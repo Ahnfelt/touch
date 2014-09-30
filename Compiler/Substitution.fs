@@ -36,6 +36,7 @@ let rec inStack (substitution : Substitution) (stack : StackType) : StackType =
 and inType (substitution : Substitution) (t : Type) : Type =
     match t with
     | Function (s1, s2) -> Function (inStack substitution s1, inStack substitution s2)
+    | Constructor (x, ts) -> Constructor (x, List.map (inType substitution) ts)
     | Variable x -> 
         match Map.tryFind x substitution.types with
         | Some(t2) -> t2

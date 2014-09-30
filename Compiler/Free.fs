@@ -17,6 +17,7 @@ let rec private freeInStack' (s : StackType) : Free =
 and private freeInType' (t : Type) : Free =
     match t with
     | Function (s1, s2) -> freeUnion' (freeInStack' s1) (freeInStack' s2)
+    | Constructor (_, ts) -> List.fold freeUnion' freeEmpty (List.map freeInType' ts)
     | Variable x -> freeEmpty
     | Bool -> freeEmpty
     | Number -> freeEmpty
