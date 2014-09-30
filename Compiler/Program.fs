@@ -78,6 +78,14 @@ let alertProgram = [
         ])
     ]
 
+let predefinedInstructions = [
+        (core ">=", [JavaScript ([Number; Number] --> [Bool], "var b = stack.pop(); var a = stack.pop(); stack.push(a < b)")]);
+        (core "+", [JavaScript ([Number; Number] --> [Number], "var b = stack.pop(); var a = stack.pop(); stack.push(a + b)")]); 
+        (core "-", [JavaScript ([Number; Number] --> [Number], "var b = stack.pop(); var a = stack.pop(); stack.push(a - b)")]);
+        (core "duplicate", [JavaScript ([Variable 2] --> [Variable 2; Variable 2], "var a = stack.pop(); stack.push(a); stack.push(a)")]);
+        (core "if", [JavaScript ((1, [Bool; (1, []) ==> (2, []); (1, []) ==> (2, [])]) ==> (2, []), "var c = stack.pop(); var b = stack.pop(); var a = stack.pop(); if(a) b(stack); else c(stack)")]);
+    ]
+
 let testProgram instructions =
     let predefinedInstructionTypes = [
             (core ">=", [Number; Number] --> [Bool]);
@@ -94,6 +102,7 @@ let testProgram instructions =
 let compile predefinedInstructionTypes instructions mainSymbol =
     let instructionTypes = Typing.checkInstructions predefinedInstructionTypes instructions
     let typedInstructions = List.map (fun (x, t) -> (x, t, snd <| List.find (fun (x', _) -> x' = x) instructions)) instructionTypes
+    // The following ignores predefined instructions: let typedInstructions = typedInstructions' |> List.filter (fun (_, _, o) -> Option.isSome o) |> List.map (fun (x, t, o) -> (x, t, Option.get o))
     match mainSymbol with
     | None -> Emit.emitInstructions typedInstructions
     | Some x -> 
@@ -108,7 +117,7 @@ let main argv =
         //testTarjan ()
         //testCheck es3
         //testProgram alertProgram
-        printfn "%s" <| compile [] alertProgram (Some (name "main"))
+        printfn "%s" <| compile [] (List.append predefinedInstructions fibProgram) None //(Some (name "main"))
         //printfn "Press return to continue..."
     with TypeError e ->
         printfn "%s" e
