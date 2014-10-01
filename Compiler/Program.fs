@@ -36,7 +36,7 @@ let call x = Instruction (core x)
 let fibProgram = [
         (name "fib", [
             Pop "n"; 
-            Push "n"; NumberLiteral 2.0; call ">=";
+            Push "n"; NumberLiteral 3.0; call ">=";
             Quote [
                 Push "n"; NumberLiteral 1.0; call "-"; Instruction (name "fib");
                 Push "n"; NumberLiteral 2.0; call "-"; Instruction (name "fib");
@@ -79,7 +79,7 @@ let alertProgram = [
     ]
 
 let predefinedInstructions = [
-        (core ">=", [JavaScript ([Number; Number] --> [Bool], "var b = stack.pop(); var a = stack.pop(); stack.push(a < b)")]);
+        (core ">=", [JavaScript ([Number; Number] --> [Bool], "var b = stack.pop(); var a = stack.pop(); stack.push(a >= b)")]);
         (core "+", [JavaScript ([Number; Number] --> [Number], "var b = stack.pop(); var a = stack.pop(); stack.push(a + b)")]); 
         (core "-", [JavaScript ([Number; Number] --> [Number], "var b = stack.pop(); var a = stack.pop(); stack.push(a - b)")]);
         (core "duplicate", [JavaScript ([Variable 2] --> [Variable 2; Variable 2], "var a = stack.pop(); stack.push(a); stack.push(a)")]);
