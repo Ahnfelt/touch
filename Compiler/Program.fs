@@ -110,7 +110,6 @@ let compile predefinedInstructionTypes instructions mainSymbol =
         if t <> ([] --> []) then raise (TypeError ("Expected the main function " + prettySymbol x + " to have type {s1 -> s1}, but it had type " + prettyType t))
         Emit.emitProgram x typedInstructions
 
-
 [<EntryPoint>]
 let main argv = 
     try 
@@ -120,7 +119,10 @@ let main argv =
         printfn "%s" <| compile [] (List.append predefinedInstructions fibProgram) None //(Some (name "main"))
         //Parser.testTypeParser "{s1 Bool {s1 -> s2} {s1 -> s2} -> s2}" 
         //printfn "Press return to continue..."
+        //printfn "%s" <| FunScript.Compiler.compile(<@ jsMain() @>)
+        System.Console.Read() |> ignore
+        0
     with TypeError e ->
         printfn "%s" e
-    System.Console.Read() |> ignore
-    0
+        System.Console.Read() |> ignore
+        1
